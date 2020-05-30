@@ -1,12 +1,18 @@
 <template>
-  <div class="container" width='1000px' height='100px'>
+  <div>
+    <div class="container" width='1000px' height='100px'></div>
+    <detail-panel ref="detailPanel"></detail-panel>
   </div>
 </template>
 
 <script>
 import * as d3 from 'd3'
+import DetailPanel from './DetailPanel'
 export default {
-  name: 'HelloWorld',
+  name: 'Canvas',
+  components: {
+    DetailPanel
+  },
   data () {
     return {
       width: 600,
@@ -23,7 +29,7 @@ export default {
       }
     }
   },
-  mounted () {
+  created () {
     this.getGraphData()
   },
   methods: {
@@ -50,7 +56,7 @@ export default {
       _this.simulation = d3.forceSimulation(nodes)
         .force('link', d3.forceLink(links).id(d => d.id).distance(150))
         .force('collide', d3.forceCollide().radius(() => 80))
-        .force('charge', d3.forceManyBody().strength(-100))
+        .force('charge', d3.forceManyBody().strength(-10))
         .force('center', d3.forceCenter(_this.width / 2, _this.height / 2))
 
       const svg = d3.select('.container')
@@ -315,6 +321,16 @@ export default {
 
     queryNode (d) {
       var _this = this
+      let data = {}
+      for (var element in d.object) {
+        let isArray = d.object[element] instanceof Array
+        if (!isArray) {
+          data[element] = d.object[element]
+        }
+      }
+      _this.$refs.detailPanel.currentNode = data
+      // console.log(_this.$refs.detailPanel.currentNode)
+      // console.log(d.object)
       var url = 'person/actedby/' + d.id
       this.axios.get(url)
         .then(function (response) {
