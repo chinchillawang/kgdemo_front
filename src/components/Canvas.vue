@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="container" width='1000px' height='100px'></div>
-    <detail-panel ref="detailPanel"></detail-panel>
+    <detail-panel ref="detailPanel" @update="getQueryResult"></detail-panel>
   </div>
 </template>
 
@@ -35,11 +35,11 @@ export default {
   methods: {
     getGraphData () {
       var _this = this
-      var url = 'person/all'
-      // var url = 'person/Tom Cruise'
+      // var url = 'person/all'
+      var url = 'person/Rob Reiner'
       this.axios.get(url)
         .then(function (response) {
-          _this.testGraph['nodes'] = response.data
+          _this.testGraph['nodes'] = [response.data]
           _this.initGraph(_this.testGraph)
         })
         .catch(function (error) {
@@ -147,7 +147,7 @@ export default {
         .attr('r', 30)
         .attr('fill', _this.color)
         .call(_this.drag(_this.simulation))
-        .on('click', _this.queryNode)
+        .on('click', _this.selectNode)
 
       _this.nodes.append('title')
         .text(d => d.id)
@@ -259,7 +259,7 @@ export default {
         .attr('r', 30)
         .attr('fill', _this.color)
         .merge(_this.nodes)
-        .on('click', _this.queryNode)
+        .on('click', _this.selectNode)
         .call(_this.drag(_this.simulation))
 
       _this.nodes.append('title')
@@ -360,8 +360,45 @@ export default {
         .catch(function (error) {
           console.log(error)
         })
+    },
+
+    selectNode (d) {
+      var _this = this
+      let data = {}
+      for (var element in d.object) {
+        let isArray = d.object[element] instanceof Array
+        if (!isArray) {
+          data[element] = d.object[element]
+        }
+      }
+      _this.$refs.detailPanel.currentNode = data
+      _this.$refs.detailPanel.isShow = true
+    },
+
+    getQueryResult (result, currentNode, currentType) {
+      for (var i = 0; i < result.length; i++) {
+        let flag = true
+        for (var j = 0; j < this.testGraph.nodes.length; j++) {
+          if (this.testGraph.nodes[j].id === result[i].id) {
+            flag = false
+            break
+          }
+        }
+        if (flag) {
+          this.testGraph.nodes.push(result[i])
+          this.testGraph.links.push({
+            'source': currentNode.name,
+            'target': result[i].id,
+            'value': 5,
+            'relationship': currentType
+          })
+        }
+      }
+      this.updateGraph(this.testGraph)
+      // console.log(_this.testGraph)
     }
   }
+
 }
 </script>
 
