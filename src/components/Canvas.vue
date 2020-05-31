@@ -82,7 +82,6 @@ export default {
         .attr('d', 'M 0 -5 L 10 0 L 0 5')
         .attr('fill', '#999999')
         .attr('stoke-opacity', 0.6)
-
       // eslint-disable-next-line no-unused-vars
       const negativeMarker = svg.append('marker')
         .attr('id', 'negativeMarker')
@@ -107,7 +106,13 @@ export default {
         .attr('stroke-opacity', 0.6)
         // .attr('marker-end', 'url(#positiveMarker)')
         .selectAll('path')
-        .data(links)
+        .data(links, function (d) {
+          if (typeof (d.source) === 'object') {
+            return d.source.id + '_' + d.relationship + '_' + d.target.id
+          } else {
+            return d.source + '_' + d.relationship + '_' + d.target
+          }
+        })
         .join('path')
         .attr('stroke-width', d => Math.sqrt(d.value))
         .attr('class', 'link')
@@ -122,7 +127,13 @@ export default {
 
       _this.linksText = g.append('g')
         .selectAll('text')
-        .data(links)
+        .data(links, function (d) {
+          if (typeof (d.source) === 'object') {
+            return d.source.id + '_' + d.relationship + '_' + d.target.id
+          } else {
+            return d.source + '_' + d.relationship + '_' + d.target
+          }
+        })
         .join('text')
         .text(function (d) {
           return d.relationship
@@ -142,7 +153,7 @@ export default {
         .attr('stroke', '#000000')
         .attr('stroke-width', 1.5)
         .selectAll('circle')
-        .data(nodes)
+        .data(nodes, d => d.id)
         .join('circle')
         .attr('r', 30)
         .attr('fill', _this.color)
@@ -157,7 +168,7 @@ export default {
         .data(nodes)
         .join('text')
         .text(function (d) {
-          return d.id
+          return d.id // 效果与d => d.id相同
         })
         .style('text-anchor', function (d) {
           return 'middle'
@@ -217,9 +228,14 @@ export default {
       const nodes = data.nodes
 
       _this.links = _this.links
-        .data(links)
-        .enter()
-        .append('path')
+        .data(links, function (d) {
+          if (typeof (d.source) === 'object') {
+            return d.source.id + '_' + d.relationship + '_' + d.target.id
+          } else {
+            return d.source + '_' + d.relationship + '_' + d.target
+          }
+        })
+        .join('path')
         .attr('stroke', '#999')
         .attr('stroke-opacity', 0.6)
         .attr('stroke-width', d => Math.sqrt(d.value))
@@ -236,9 +252,14 @@ export default {
         })
 
       _this.linksText = _this.linksText
-        .data(links)
-        .enter()
-        .append('text')
+        .data(links, function (d) {
+          if (typeof (d.source) === 'object') {
+            return d.source.id + '_' + d.relationship + '_' + d.target.id
+          } else {
+            return d.source + '_' + d.relationship + '_' + d.target
+          }
+        })
+        .join('text')
         .style('text-anchor', 'middle')
         .style('fill', 'red')
         .style('font-size', '10px')
@@ -253,9 +274,8 @@ export default {
         .attr('class', 'link-text')
 
       _this.nodes = _this.nodes
-        .data(nodes)
-        .enter()
-        .append('circle')
+        .data(nodes, d => d.id)
+        .join('circle')
         .attr('r', 30)
         .attr('fill', _this.color)
         .merge(_this.nodes)
@@ -267,8 +287,7 @@ export default {
 
       _this.nodeText = _this.nodeText
         .data(nodes)
-        .enter()
-        .append('text')
+        .join('text')
         .merge(_this.nodeText)
         .text(function (d) {
           return d.id
@@ -378,6 +397,12 @@ export default {
     getQueryResult (result, currentNode, currentType) {
       for (var i = 0; i < result.length; i++) {
         let flag = true
+        // let templinks = {
+        //   'source': currentNode.name,
+        //   'target': result[i].id,
+        //   'value': 5,
+        //   'relationship': currentType
+        // }
         for (var j = 0; j < this.testGraph.nodes.length; j++) {
           if (this.testGraph.nodes[j].id === result[i].id) {
             flag = false
@@ -386,12 +411,33 @@ export default {
         }
         if (flag) {
           this.testGraph.nodes.push(result[i])
-          this.testGraph.links.push({
-            'source': currentNode.name,
-            'target': result[i].id,
-            'value': 5,
-            'relationship': currentType
-          })
+        } else {
+
+        }
+        this.testGraph.links.push({
+          'source': currentNode.name,
+          'target': result[i].id,
+          'value': 5,
+          'relationship': currentType
+        })
+      }
+      for (i = this.testGraph.links.length - 1; i >= 0; i--) {
+        if (this.testGraph.links[i].source.id === currentNode.name && this.testGraph.links[i].relationship !== currentType) {
+          let isRemove = true
+          for (var k = 0; k < result.length; k++) {
+            if (result[k].id === this.testGraph.links[i].target.id) {
+              isRemove = false
+              break
+            }
+          }
+          if (isRemove) {
+            for (k = this.testGraph.nodes.length - 1; k >= 0; k--) {
+              if (this.testGraph.nodes[k].id === this.testGraph.links[i].target.id) {
+                this.testGraph.nodes.splice(k, 1)
+              }
+            }
+          }
+          this.testGraph.links.splice(i, 1)
         }
       }
       this.updateGraph(this.testGraph)

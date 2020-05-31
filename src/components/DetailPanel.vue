@@ -14,14 +14,10 @@
         </tbody>
       </table>
       <el-form ref="form" label-width="80px" v-show="isShow">
-        <el-form-item label="关系类型">
           <el-select v-model="currentType" placeholder="请选择查询关系">
             <el-option v-for="(type, i) in relationshipTypes" :key="type" :label="type" :value="i"></el-option>
           </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="onSubmit">查询关系</el-button>
-        </el-form-item>
+          <el-button type="primary" @click="onSubmit" class="submit-bnt">查询关系</el-button>
       </el-form>
     </div>
   </el-card>
@@ -87,6 +83,6 @@ export default {
   width: 100%;
   height: 30px;
   line-height: 0px;
-  margin-top: 0px;
+  margin-top: 10px;
 }
 </style>
