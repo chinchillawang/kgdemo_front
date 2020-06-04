@@ -9,6 +9,8 @@ import 'element-ui/lib/theme-chalk/index.css'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 
+import store from './store'
+
 /* 配置axios */
 axios.defaults.baseURL = '/api'
 axios.defaults.withCredentials = true
@@ -21,6 +23,7 @@ Vue.config.productionTip = false
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>'
 })
