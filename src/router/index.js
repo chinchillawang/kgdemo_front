@@ -5,6 +5,7 @@ import Register from '@/components/Register'
 import Login from '@/components/Login'
 import Index from '@/components/Index'
 import Home from '@/components/home/Home'
+import PatentList from '@/components/patentDisplay/PatentList'
 
 Vue.use(Router)
 
@@ -35,6 +36,11 @@ export default new Router({
           path: '/home',
           name: 'Home',
           component: Home
+        },
+        {
+          path: '/PatentList',
+          name: 'PatentList',
+          component: PatentList
         }
       ]
     }

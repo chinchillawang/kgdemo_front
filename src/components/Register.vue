@@ -51,6 +51,9 @@ export default {
         .catch(function (error) {
           console.log(error)
         })
+    },
+    toLogin () {
+      this.$router.replace('/login')
     }
   }
 }
