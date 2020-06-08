@@ -20,7 +20,8 @@ export default {
     return {
       navList: [
         { name: '首页', url: '/home' },
-        { name: '专利列表', url: '/patentList' }
+        { name: '专利列表', url: '/patent_list' },
+        { name: '知识图谱', url: '/patent_kg' }
       ]
     }
   },

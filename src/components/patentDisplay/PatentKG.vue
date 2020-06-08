@@ -9,7 +9,7 @@
 import * as d3 from 'd3'
 import DetailPanel from './DetailPanel'
 export default {
-  name: 'Canvas',
+  name: 'PatentKG',
   components: {
     DetailPanel
   },
@@ -24,35 +24,63 @@ export default {
       linksText: [],
       simulation: null,
       testGraph: {
-        'nodes': [],
-        'links': []
+        nodes: [],
+        links: []
       }
     }
   },
   created () {
     this.getGraphData()
+    // console.log(this.testGraph)
+    // this.initGraph(this.testGraph)
   },
   methods: {
     getGraphData () {
       var _this = this
-      var url = 'person/all'
-      // var url = 'person/Rob Reiner'
-      this.axios.get(url)
-        .then(function (response) {
-          _this.testGraph['nodes'] = response.data
+      var urlNode = '/patent_kg/query/人工智能/nodes'
+      var urlLink = '/patent_kg/query/人工智能/links'
+      this.axios.all([
+        this.axios.get(urlNode),
+        this.axios.get(urlLink)
+      ])
+        .then(this.axios.spread(function (responseNodes, responseLinks) {
+          // console.log(responseNodes.data)
+          // console.log(responseLinks.data)
+          _this.testGraph.nodes = responseNodes.data
+          _this.testGraph.links = responseLinks.data
           _this.initGraph(_this.testGraph)
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-    // this.initGraph(this.testGraph)
+        }))
+        // .then(this.axios.spread(function (nodes, links){}) {
+        //   _this.testGraph.nodes = response.data
+        //   _this.initGraph(_this.testGraph)
+        //   // console.log(_this.response)
+        // })
+        // .catch(function (error) {
+        //   console.log(error)
+        // })
+      // url = '/patent_kg/query/人工智能/links'
+      // this.axios.get(url)
+      //   .then(function (response) {
+      //     _this.testGraph['links'] = response.data
+      //     // _this.initGraph(_this.testGraph)
+      //     // console.log(_this.response)
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error)
+      //   })
+      // _this.initGraph(_this.testGraph)
+      // console.log(_this.testGraph)
     },
 
     initGraph (data) {
       var _this = this
-      console.log(data)
-      const links = data.links.map(d => Object.create(d))
+      console.log(_this.testGraph)
+      console.log(data.nodes)
       const nodes = data.nodes.map(d => Object.create(d))
+      const links = data.links.map(d => Object.create(d))
+
+      console.log(links)
+      console.log(nodes)
 
       _this.simulation = d3.forceSimulation(nodes)
         .force('link', d3.forceLink(links).id(d => d.id).distance(150))
